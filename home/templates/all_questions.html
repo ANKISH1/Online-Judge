@@ -1,10 +1,5 @@
 {% for question in all_questions %}
-{{question.name}}
+<a href="/home/problem/{{question.id}}">{{question.name}}</a>
 <br>
 {% endfor %}
 
-<!--&lt;!&ndash; all_questions.html &ndash;&gt;-->
-<!--<h1>All Questions</h1>-->
-<!--{% for question in all_questions %}-->
-<!--    <p>{{ question.name }}</p>-->
-<!--{% endfor %}-->
