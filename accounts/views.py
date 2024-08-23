@@ -37,7 +37,7 @@ def login_user(request):
             messages.info(request, 'User with this username does not exist')
             return redirect('/auth/login/')
 
-        user = authenticate(usename=username, password=password)
+        user = authenticate(username=username, password=password)
         if user is None:
             messages.info(request, 'invalid password')
             return redirect('/auth/login')
