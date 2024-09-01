@@ -1,5 +1,52 @@
-{% for question in all_questions %}
-<a href="/home/problem/{{question.id}}">{{question.name}}</a>
-<br>
-{% endfor %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Questions List</title>
+    <!-- Include Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .question-list {
+            margin-top: 20px;
+        }
+        .question-item {
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            background-color: #f8f9fa;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.2s ease;
+        }
+        .question-item:hover {
+            background-color: #e9ecef;
+        }
+        .question-item a {
+            text-decoration: none;
+            color: #007bff;
+            font-weight: 500;
+        }
+        .question-item a:hover {
+            color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1 class="mt-5">Available Questions</h1>
+    <div class="question-list">
+        {% for question in all_questions %}
+            <div class="question-item">
+                <a href="/home/submit/{{ question.id }}">{{ question.name }}</a>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Include Bootstrap JS (optional, if you need interactive components) -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
 

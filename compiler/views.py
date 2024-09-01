@@ -1,9 +1,13 @@
-from django.shortcuts import render
-from compiler.forms import CodeSubmissionForm
+from django.shortcuts import render, get_object_or_404
+from django.http import HttpResponse
+from .forms import CodeSubmissionForm
 from pathlib import Path
 from django.conf import settings
 import uuid
 import subprocess
+# from .models import Problem
+
+import os
 
 
 
@@ -18,20 +22,18 @@ def submit(request):
             print(submission.language)
             print(submission.code)
             output = run_code(submission.language, submission.code, submission.input_data)
+            print(f"Generated Output: {output}")
             submission.output_data = output
             submission.save()
             return render(request, "result.html", {"submission": submission})
 
     else:
         form = CodeSubmissionForm()
-        context = {
-            "form": form,
 
-        }
-    return render(request, "index.html", context)
+    return render(request, "index.html", {"form": form})
 
 def run_code(language, code, input_data):
-    project_path = Path(settings.Base_DIR)
+    project_path = Path(settings.BASE_DIR)
     directories = ["codes", "inputs", "outputs"]
 
     for directory in directories:
@@ -78,7 +80,7 @@ def run_code(language, code, input_data):
         with open(input_file_path, "r") as input_file:
             with open(output_file_path, "w") as output_file:
                 subprocess.run(
-                    ["python3", str(code_file_path)],
+                    ["python", str(code_file_path)],
                     stdin=input_file,
                     stdout=output_file,
                 )
@@ -87,3 +89,12 @@ def run_code(language, code, input_data):
         output_data = output_file.read()
 
     return output_data
+
+
+def question_detail(request, problem_id):
+    question= get_object_or_404(Problem, id = problem_id)
+    context = {
+        'question':question
+    }
+    template = loader.get_template('index.html')
+    return HttpResponse(template.render(context, request))

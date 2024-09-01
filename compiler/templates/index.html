@@ -1,6 +1,59 @@
-<h1>Code Compiler</h1>
-<form method="post">
-{% csrf_token% }
-{{form.as_p}} I
-<button type="submit">Run Code</button>
-</form>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Compiler</title>
+    <style>
+        /* Flexbox container to hold both sections */
+        .container {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px;
+            gap: 40px; /* Space between the two sections */
+        }
+
+        /* Left side for the question details */
+        .question-details {
+            flex: 1; /* Take up one part of the available space */
+        }
+
+        /* Right side for the form */
+        .code-form {
+            flex: 1; /* Take up one part of the available space */
+        }
+
+        /* Optional styling */
+        .code-form form {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left side: Question Details -->
+        <div class="question-details">
+            <h2>Question Details</h2>
+            <p>Here you can add the question details...</p>
+            <!-- Insert dynamic content related to the question here -->
+        </div>
+
+        <!-- Right side: Code Submission Form -->
+        <div class="code-form">
+            <h1>Code Compiler</h1>
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit">Run Code</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

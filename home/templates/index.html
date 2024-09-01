@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Compiler</title>
+    <!-- Include Bootstrap CSS for styling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 1200px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        .question-details {
+            flex: 2; /* Give more space to problem statement */
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            min-height: 300px; /* Ensure a minimum height */
+        }
+
+        .code-editor {
+            flex: 1; /* Less space for the code editor */
+            background-color: #e9f7ff; /* Suitable background color for the editor area */
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .code-editor textarea {
+            flex: 1;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1rem;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 100%;
+            resize: none;
+            background-color: #f0f8ff; /* Background color inside the editor */
+        }
+
+        .input-output {
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-output textarea {
+            flex: 1;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1rem;
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            resize: none;
+            height: 100px;
+            background-color: #f0f8ff; /* Background color for input and output */
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn-run, .btn-submit {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .btn-run {
+            background-color: #28a745;
+        }
+
+        .btn-run:hover {
+            background-color: #218838;
+        }
+
+        .btn-submit {
+            background-color: #007bff;
+        }
+
+        .btn-submit:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div id="root" class="container">
+        <!-- Top Half: Question Details -->
+        <div class="question-details">
+            <h2>{{ question.name }}</h2>
+            <p>{{ question.statement }}</p>
+        </div>
+
+        <!-- Bottom Half: Code Editor -->
+        <div class="code-editor">
+            <form method="post" id="codeForm">
+                {% csrf_token %}
+                {{ form.language }}
+                {{ form.code }}
+                {{ form.input_data }}
+
+                <div class="input-output">
+                    <textarea name="output" id="output" class="form-control" placeholder="Output..." readonly></textarea>
+                </div>
+
+                <div class="btn-group">
+                    <button type="button" class="btn-run" onclick="runCode()">Run Code</button>
+                    <button type="submit" name = "submit_code" class="btn-submit">Submit Code</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+<script>
+function runCode() {
+    console.log("Run Code button clicked!");  // Debugging
+    const form = document.getElementById('codeForm');
+    const formData = new FormData(form);
+    formData.append('run_code','true')
+
+    fetch("{% url 'submit' question.id %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        console.log(data);  // Debugging
+        if (data.output) {
+            document.getElementById('output').value = data.output;
+        } else {
+            document.getElementById('output').value = 'Error running code.';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);  // Debugging
+        document.getElementById('output').value = 'Error: ' + error;
+    });
+}
+</script>
+</body>
+</html>
