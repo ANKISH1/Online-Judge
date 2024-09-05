@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">Leaderboard</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th scope="col">Rank</th>
+                <th scope="col">Username</th>
+                <th scope="col">Problems Solved</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in leaderboard_data %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ user.user__username }}</td>
+                <td>{{ user.total_problems_solved }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

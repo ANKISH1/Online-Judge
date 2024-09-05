@@ -9,8 +9,16 @@ from pathlib import Path
 from django.conf import settings
 import uuid
 import subprocess
-from .models import Problem, TestCase
+from .models import Problem, TestCase, CodeSubmission
 from django.http import JsonResponse
+from django.db.models import Count
+from django.shortcuts import render, redirect
+from django.contrib.auth import authenticate,login,logout
+from django.contrib import messages
+
+
+
+
 
 
 
@@ -23,6 +31,20 @@ def question_list(request):
     }
     template = loader.get_template('all_questions.html')
     return HttpResponse(template.render(context,request))
+
+def leaderboard(request):
+    leaderboard_data = (
+        CodeSubmission.objects.filter(status='Passed')
+        .values('user__username')
+        .annotate(total_problems_solved=Count('problem', distinct=True))
+        .order_by('-total_problems_solved')
+    )
+
+    context = {
+        'leaderboard_data': leaderboard_data,
+    }
+
+    return render(request, 'leaderboard.html', context)
 
 # def question_detail(request, problem_id):
 #     question= get_object_or_404(Problem, id = problem_id)
@@ -40,6 +62,7 @@ def submit(request, problem_id):
         form = CodeSubmissionForm(request.POST)
         if form.is_valid():
             submission = form.save(commit=False)
+            submission.user = request.user
             print(submission.language)
             print(submission.code)
             if "run_code" in request.POST:
@@ -69,9 +92,9 @@ def submit(request, problem_id):
                 if all_testcase_passed:
                     submission.status = "Passed"
                     submission.result = "All test cases passed"
-            else:
-                submission.status = "Failed"
-                submission.result = f"{len(failed_cases)} test cases failed."
+                else:
+                    submission.status = "Failed"
+                    submission.result = f"{len(failed_cases)} test cases failed."
 
             submission.save()
             return JsonResponse({
@@ -155,4 +178,9 @@ def run_code(language, code, input_data):
 
     return output_data
 
+
+def post_logout(request):
+    logout(request)
+    messages.info(request, 'logout successful')
+    return redirect('/auth/login/')
 
