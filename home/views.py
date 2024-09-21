@@ -100,7 +100,7 @@ def submit(request, problem_id):
             return JsonResponse({
                 'status':submission.status,
                 'result':submission.result,
-                'output': submission.output_data,
+                # 'output': submission.output_data,
                 'failed_cases': failed_cases
             })
         else:
@@ -116,10 +116,11 @@ def submit(request, problem_id):
         return render(request, "index.html", context)
 
 def run_code(language, code, input_data):
-    input_data= input_data.replace('\r\n','\n')
+    input_data = input_data.replace('\r\n', '\n')  # Normalize input newlines
     project_path = Path(settings.BASE_DIR)
     directories = ["codes", "inputs", "outputs"]
 
+    # Create directories if they don't exist
     for directory in directories:
         dir_path = project_path / directory
         if not dir_path.exists():
@@ -130,31 +131,39 @@ def run_code(language, code, input_data):
     outputs_dir = project_path / "outputs"
 
     unique = str(uuid.uuid4())
-    code_file_name = f"{unique}.{language}"
-    input_file_name = f"{unique}.txt"
-    output_file_name = f"{unique}.txt"
+    if language == "cpp":
+        code_file_name = f"{unique}.cpp"
+    elif language == "c":
+        code_file_name = f"{unique}.c"
+    elif language == "py":
+        code_file_name = f"{unique}.py"
 
     code_file_path = codes_dir / code_file_name
-    input_file_path = inputs_dir / input_file_name
-    output_file_path = outputs_dir / output_file_name
+    input_file_path = inputs_dir / f"{unique}.txt"
+    output_file_path = outputs_dir / f"{unique}.txt"
 
     print(f"Code file path: {code_file_path}")
     print(f"Input file path: {input_file_path}")
     print(f"Output file path: {output_file_path}")
 
+    # Write code to file
     with open(code_file_path, "w") as code_file:
         code_file.write(code)
 
+    # Write input data to file
     with open(input_file_path, "w") as input_file:
         input_file.write(input_data)
 
+    # Prepare for output
     with open(output_file_path, "w") as output_file:
         pass
 
+    # Compile and run code
     if language == "cpp":
         executable_path = codes_dir / unique
         compile_result = subprocess.run(
-            ["g++", str(code_file_path), "-o", str(executable_path)]
+            ["g++", str(code_file_path), "-o", str(executable_path)],
+            capture_output=True
         )
         if compile_result.returncode == 0:
             with open(input_file_path, "r") as input_file:
@@ -164,16 +173,39 @@ def run_code(language, code, input_data):
                         stdin=input_file,
                         stdout=output_file,
                     )
+        else:
+            return compile_result.stderr.decode()
+
+    elif language == "c":
+        executable_path = codes_dir / unique
+        compile_result = subprocess.run(
+            ["gcc", str(code_file_path), "-o", str(executable_path)],
+            capture_output=True
+        )
+        if compile_result.returncode == 0:
+            with open(input_file_path, "r") as input_file:
+                with open(output_file_path, "w") as output_file:
+                    subprocess.run(
+                        [str(executable_path)],
+                        stdin=input_file,
+                        stdout=output_file,
+                    )
+        else:
+            return compile_result.stderr.decode()
+
     elif language == "py":
         with open(input_file_path, "r") as input_file:
             with open(output_file_path, "w") as output_file:
-                subprocess.run(
-                    ["python", str(code_file_path)],
+                result = subprocess.run(
+                    ["python3", str(code_file_path)],
                     stdin=input_file,
                     stdout=output_file,
+                    stderr=subprocess.PIPE
                 )
+                print(result.stderr.decode())  # Debug for Python runtime errors
 
-    with open(output_file_path,"r") as output_file:
+    # Read and return the output
+    with open(output_file_path, "r") as output_file:
         output_data = output_file.read()
 
     return output_data
